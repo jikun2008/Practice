@@ -1,5 +1,5 @@
 # Practice  
-Practice  是一个使用在stomp协议并用websocket连接的Android库
+Practice  是一个使用stomp协议的webSocket连接的Android库
 
 底层websocket是需要okhttp依赖 
 
