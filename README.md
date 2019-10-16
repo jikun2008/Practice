@@ -3,13 +3,17 @@ Practice  是一个使用在stomp协议并用websocket连接的Android库
 
 底层websocket是需要okhttp依赖 
 
-如何使用  
+## 如何使用  
 
 ### 首先你需要引入 okhttp库
+```
+implementation("com.squareup.okhttp3:okhttp:4.0.1")
+
+```
 
 
 然后在引入Practice库
-Step 1. Add the JitPack repository to your build file
+#### Step 1. Add the JitPack repository to your build file
 
 Add it in your root build.gradle at the end of repositories:
 
@@ -21,7 +25,7 @@ Add it in your root build.gradle at the end of repositories:
 		}
 	}
 ```
-  Step 2. Add the dependency
+####  Step 2. Add the dependency
   
 ```
   
@@ -32,7 +36,7 @@ Add it in your root build.gradle at the end of repositories:
 
 ```
 
-code:
+### example:
 
 ```
 
