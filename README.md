@@ -1,15 +1,33 @@
 # Practice  
-Practice  是一个使用在stomp协议并用websocket连接的Android库
+Practice  是一个使用stomp协议的webSocket连接的Android库
 
 底层websocket是需要okhttp依赖 
 
-如何使用  
+内部是实现了心跳 当服务器返回Connected的时候:
+
+例如:
+
+```
+CONNECTED
+version:1.1
+heart-beat:3000,6000
+```
+
+会根据heart-beat的值向服务发送心跳,同时也会检查服务器定时向client发送心跳 如果超过3次未发送 自动断开连接
+    
+
+
+## 如何使用  
 
 ### 首先你需要引入 okhttp库
+```
+implementation("com.squareup.okhttp3:okhttp:4.0.1")
+
+```
 
 
 然后在引入Practice库
-Step 1. Add the JitPack repository to your build file
+#### Step 1. Add the JitPack repository to your build file
 
 Add it in your root build.gradle at the end of repositories:
 
@@ -21,7 +39,7 @@ Add it in your root build.gradle at the end of repositories:
 		}
 	}
 ```
-  Step 2. Add the dependency
+####  Step 2. Add the dependency
   
 ```
   
@@ -32,7 +50,7 @@ Add it in your root build.gradle at the end of repositories:
 
 ```
 
-code:
+### example:
 
 ```
 
