@@ -37,32 +37,38 @@ code:
 ```
 
 
-    @Override
+    //注册
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        tvTextView = findViewById(R.id.tvTextView);
 
-        practice = new Practice.Builder().version(VersionEnum.VERSION_1_1)
+   	 practice = new Practice.Builder().version(VersionEnum.VERSION_1_1)
                 .build();
-        practice.register(this);
-
+         practice.register(this);
     }
 
-    public void testConnect(View view) {
-        Request request = new Request.Builder().url("ws://10.28.6.69:8091/noSocketJs").build();
-        practice.startConnect(request);
+ 
 
-    }
+   
+    //Connect
+     Request request = new Request.Builder().url("ws://10.28.6.69:8091/noSocketJs").build();
+     practice.startConnect(request);
 
+    
+
+
+    //当服务器连接成功的时候会调用这个方法 @OnStompConnect修饰的方法
     @OnStompConnect
     public void onConnect() {
         stringBuilder = new StringBuilder();
         stringBuilder.append("连接成功\n");
         tvTextView.setText(stringBuilder.toString());
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
+	
+
+    //发Subscribe消息到服务端
+    practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
+        
     }
 
+  //连接断开的时候会调用这个方法 @OnStompDisConnect修饰的方法
     @OnStompDisConnect
     public void onDisConnect(Integer code, String info) {
         stringBuilder.append("连接失败:code=" + code + "__info=" + info + "\n");
@@ -70,6 +76,7 @@ code:
     }
 
 
+   //例如当收到destination=/topic/hello的消息时候会回调这个方法
     @OnStompSubscribe("/topic/hello")
     public void message(StompMessage stompMessage) {
         stringBuilder.append(stompMessage.compile() + "\n");
@@ -81,11 +88,14 @@ code:
     @Override
     protected void onDestroy() {
         super.onDestroy();
+	//当不需要使用的取消注册
         practice.unregister(this);
+	//断开连接
         practice.disConnect();
     }
 
     public void testDisConnect(View view) {
+        //断开连接
         practice.disConnect();
 
     }
