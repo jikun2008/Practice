@@ -3,6 +3,9 @@ Practice  是一个使用stomp协议的webSocket连接的Android库
 
 底层websocket是需要okhttp依赖 
 
+内部是实现了心跳 当服务器返回Connected的时候如何带有 心跳时间 会根据服务时间发送心跳
+
+
 ## 如何使用  
 
 ### 首先你需要引入 okhttp库
