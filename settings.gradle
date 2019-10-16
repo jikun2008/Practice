@@ -1,0 +1,2 @@
+include ':app', ':practice'
+rootProject.name='StompExample'
