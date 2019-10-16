@@ -25,5 +25,6 @@ android {
 }
 
 dependencies {
-    api("com.squareup.okhttp3:okhttp:4.0.1")
+
+    compileOnly ("com.squareup.okhttp3:okhttp:4.0.1")
 }
