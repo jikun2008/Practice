@@ -8,6 +8,7 @@ import com.yisingle.stomp.practice.message.StompMessage;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,9 +32,7 @@ public class StompMessageHelper {
     public static StompMessage createSendStompMessage(String destination, StompHeader stompHeader, String data) {
         List<StompHeader> headers = new ArrayList<>();
         headers.add(new StompHeader(StompHeader.DESTINATION, destination));
-        if (!TextUtils.isEmpty(data)) {
-            headers.add(new StompHeader(StompHeader.CONTENT_LENGTH, data.length() + ""));
-        }
+
 
         if (null != stompHeader) {
             headers.add(stompHeader);

@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tvTextView = findViewById(R.id.tvTextView);
 
-        practice = new Practice.Builder().version(VersionEnum.VERSION_1_1)
+        practice = new Practice.Builder().version(VersionEnum.VERSION_1_2)
                 .build();
         practice.register(this);
 
@@ -41,12 +41,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void testDisConnect(View view) {
+        practice.disConnect();
+
+    }
+
+    public void testSendMessage(View view) {
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1",null,"sssssss"));
+    }
+
+    public void testSendMessage1(View view) {
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1",null,"a测"));
+    }
+
     @OnStompConnect
     public void onConnect() {
         stringBuilder = new StringBuilder();
         stringBuilder.append("连接成功\n");
         tvTextView.setText(stringBuilder.toString());
         practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/queue/hello", null));
     }
 
     @OnStompDisConnect
@@ -64,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @OnStompSubscribe("/queue/hello")
+    public void messagequeue(StompMessage stompMessage) {
+        stringBuilder.append(stompMessage.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -71,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
         practice.disConnect();
     }
 
-    public void testDisConnect(View view) {
-        practice.disConnect();
 
-    }
+
+
 }

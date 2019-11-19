@@ -1,7 +1,10 @@
 package com.yisingle.stomp.practice.message;
 
 
+import android.text.TextUtils;
+
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -13,7 +16,8 @@ import java.util.regex.Pattern;
  */
 public class StompMessage {
 
-    public static final String TERMINATE_MESSAGE_SYMBOL = "\u0000";
+
+    private static final String TERMINATE_MESSAGE_SYMBOL = "\u0000";
 
     private static final Pattern PATTERN_HEADER = Pattern.compile("([^:\\s]+)\\s*:\\s*([^:\\s]+)");
 
@@ -60,6 +64,7 @@ public class StompMessage {
         for (StompHeader header : mStompHeaders) {
             builder.append(header.getKey()).append(':').append(header.getValue()).append('\n');
         }
+        addContentLengthHeader(builder,mPayload);
         builder.append('\n');
         if (mPayload != null) {
             builder.append(mPayload);
@@ -67,6 +72,19 @@ public class StompMessage {
         }
         builder.append(TERMINATE_MESSAGE_SYMBOL);
         return builder.toString();
+    }
+
+    //这里要把payload转换成utf-8  utf-8   中文是3个字符 英文是1个字符
+    private void addContentLengthHeader(StringBuilder builder,String payload){
+        if (!TextUtils.isEmpty(payload)) {
+            byte[] bss = new byte[0];
+            try {
+                bss = payload.getBytes("utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            builder.append(StompHeader.CONTENT_LENGTH).append(':').append(bss.length).append('\n');
+        }
     }
 
     public static StompMessage from(String data) {
@@ -87,8 +105,7 @@ public class StompMessage {
             headers.add(new StompHeader(matcher.group(1), matcher.group(2)));
         }
 
-        reader.skip("\n\n");
-
+        //reader.skip("\n\n");
         reader.useDelimiter(TERMINATE_MESSAGE_SYMBOL);
         String payload = reader.hasNext() ? reader.next() : null;
 

@@ -72,7 +72,7 @@ public class Practice {
     }
 
     private boolean sendMessage(String message) {
-        Log.e(TAG, message);
+         Log.e(TAG, message);
         if (null != webSocket) {
             return webSocket.send(message);
         } else {
