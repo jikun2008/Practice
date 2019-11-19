@@ -27,6 +27,9 @@ import okio.ByteString;
 
 public class Practice {
     public static String TAG = Practice.class.getSimpleName();
+    private List<MessageInterceptor> sendMessageInterceptors;
+    private List<MessageInterceptor> reviceMessageInterceptors;
+
     private OkHttpClient okHttpClient;
     private OkHttpClient.Builder okHttpBuilder;
     private WebSocket webSocket;
@@ -36,6 +39,8 @@ public class Practice {
     private HeartBeatTask heartBeatTask;
 
     private Practice(Builder builder, StompMessage connectMessage) {
+        sendMessageInterceptors = builder.sendMessageInterceptors;
+        reviceMessageInterceptors = builder.reviceMessageInterceptors;
         okHttpBuilder = builder.okHttpBuilder;
         okHttpClient = okHttpBuilder.build();
         this.connectMessage = connectMessage;
@@ -46,6 +51,24 @@ public class Practice {
 
 
     public void startConnect(Request request) {
+        startConnect(request, null, null);
+    }
+
+    public void startConnect(Request request, StompHeader... connectStompHeaders) {
+        List<StompHeader> connectStompHeaderList = new ArrayList<>();
+        for (StompHeader header : connectStompHeaders) {
+            if (null != header) {
+                connectStompHeaderList.add(header);
+            }
+        }
+        startConnect(request, connectStompHeaderList);
+
+    }
+
+    public void startConnect(Request request, List<StompHeader> connectStompHeaderList) {
+        if (null != connectStompHeaderList) {
+            connectMessage.getStompHeaders().addAll(connectStompHeaderList);
+        }
         okHttpClient.newWebSocket(request, webSocketListener);
     }
 
@@ -68,11 +91,14 @@ public class Practice {
     }
 
     public boolean sendStompMessage(StompMessage stompMessage) {
+        for (MessageInterceptor interceptor : sendMessageInterceptors) {
+            interceptor.intercept(stompMessage);
+        }
         return sendMessage(stompMessage.compile());
     }
 
     private boolean sendMessage(String message) {
-         Log.e(TAG, message);
+        Log.e(TAG, message);
         if (null != webSocket) {
             return webSocket.send(message);
         } else {
@@ -91,6 +117,9 @@ public class Practice {
 
         if (!"\n".equals(message)) {
             Log.e(TAG, TAG + "-parseMessage:" + message);
+            for (MessageInterceptor interceptor : reviceMessageInterceptors) {
+                interceptor.intercept(stompMessage);
+            }
         }
 
         if (StompCommand.CONNECTED.equals(stompMessage.getStompCommand())) {
@@ -180,6 +209,8 @@ public class Practice {
 
 
     public static final class Builder {
+        private List<MessageInterceptor> sendMessageInterceptors = new ArrayList<>();
+        private List<MessageInterceptor> reviceMessageInterceptors = new ArrayList<>();
         private long sendHeartbeatTime = 3000;
         private long acceptHeartbeatTime = 3000;
         private String version = VersionEnum.VERSION_1_1.getVersion();
@@ -198,6 +229,31 @@ public class Practice {
 
         public Builder okHttpBuilder(OkHttpClient.Builder val) {
             okHttpBuilder = val;
+            return this;
+        }
+
+        public Builder sendMessageInterceptors(MessageInterceptor... interceptors) {
+            for (MessageInterceptor interceptor : interceptors) {
+                sendMessageInterceptors.add(interceptor);
+            }
+
+            return this;
+        }
+
+        public Builder reviceMessageInterceptors(MessageInterceptor... interceptors) {
+            for (MessageInterceptor interceptor : interceptors) {
+                reviceMessageInterceptors.add(interceptor);
+            }
+            return this;
+        }
+
+        public Builder sendMessageInterceptors(List<MessageInterceptor> messageInterceptors) {
+            sendMessageInterceptors.addAll(messageInterceptors);
+            return this;
+        }
+
+        public Builder reviceMessageInterceptors(List<MessageInterceptor> reviceMessageInterceptors) {
+            reviceMessageInterceptors.addAll(reviceMessageInterceptors);
             return this;
         }
 

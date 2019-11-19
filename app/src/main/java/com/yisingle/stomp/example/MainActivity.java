@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.yisingle.stomp.practice.MessageInterceptor;
 import com.yisingle.stomp.practice.Practice;
 import com.yisingle.stomp.practice.VersionEnum;
 import com.yisingle.stomp.practice.annotation.callback.OnStompConnect;
 import com.yisingle.stomp.practice.annotation.callback.OnStompDisConnect;
 import com.yisingle.stomp.practice.annotation.callback.OnStompSubscribe;
+import com.yisingle.stomp.practice.message.StompHeader;
 import com.yisingle.stomp.practice.message.StompMessage;
 import com.yisingle.stomp.practice.utils.StompMessageHelper;
 
@@ -30,6 +32,14 @@ public class MainActivity extends AppCompatActivity {
         tvTextView = findViewById(R.id.tvTextView);
 
         practice = new Practice.Builder().version(VersionEnum.VERSION_1_2)
+                .sendMessageInterceptors(new MessageInterceptor() {
+                    @Override
+                    public void intercept(StompMessage stompMessage) {
+//                        StompHeader stompHeader=new StompHeader();
+//                        StompHeader stompHeader=new StompHeader();
+//                        stompMessage.getStompHeaders().add()
+                    }
+                })
                 .build();
         practice.register(this);
 
@@ -37,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void testConnect(View view) {
         Request request = new Request.Builder().url("ws://10.28.6.69:8091/noSocketJs").build();
-        practice.startConnect(request);
+        StompHeader nameHeader = new StompHeader("username","jikun");
+        StompHeader passwordHeader = new StompHeader("password","123456");
+        practice.startConnect(request,nameHeader,passwordHeader);
 
     }
 
@@ -47,11 +59,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void testSendMessage(View view) {
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1",null,"sssssss"));
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1", null, "sssssss"));
     }
 
     public void testSendMessage1(View view) {
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1",null,"a测"));
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1", null, "a测"));
     }
 
     @OnStompConnect
@@ -61,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         tvTextView.setText(stringBuilder.toString());
         practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
         practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/queue/hello", null));
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/queue/message", null));
     }
 
     @OnStompDisConnect
@@ -84,14 +97,18 @@ public class MainActivity extends AppCompatActivity {
         tvTextView.setText(stringBuilder.toString());
     }
 
+    @OnStompSubscribe("/user/queue/message")
+    public void messageuserhello(StompMessage stompMessage) {
+        stringBuilder.append(stompMessage.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         practice.unregister(this);
         practice.disConnect();
     }
-
-
 
 
 }

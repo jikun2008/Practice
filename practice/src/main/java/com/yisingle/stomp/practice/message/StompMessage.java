@@ -64,7 +64,10 @@ public class StompMessage {
         for (StompHeader header : mStompHeaders) {
             builder.append(header.getKey()).append(':').append(header.getValue()).append('\n');
         }
-        addContentLengthHeader(builder,mPayload);
+        if (null != findHeader("StompHeader.CONTENT_LENGTH")) {
+            addContentLengthHeader(builder, mPayload);
+        }
+
         builder.append('\n');
         if (mPayload != null) {
             builder.append(mPayload);
@@ -75,7 +78,7 @@ public class StompMessage {
     }
 
     //这里要把payload转换成utf-8  utf-8   中文是3个字符 英文是1个字符
-    private void addContentLengthHeader(StringBuilder builder,String payload){
+    private void addContentLengthHeader(StringBuilder builder, String payload) {
         if (!TextUtils.isEmpty(payload)) {
             byte[] bss = new byte[0];
             try {
@@ -125,7 +128,6 @@ public class StompMessage {
     public static String getHeartBeatMessage() {
         return "\r\n";
     }
-
 
 
 }
