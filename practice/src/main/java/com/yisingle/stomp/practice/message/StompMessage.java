@@ -2,7 +2,6 @@ package com.yisingle.stomp.practice.message;
 
 
 import android.text.TextUtils;
-
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

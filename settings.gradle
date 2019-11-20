@@ -1,2 +1,2 @@
 include ':app', ':practice'
-rootProject.name='StompExample'
+rootProject.name='Practice'
