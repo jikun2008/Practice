@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     private StringBuilder stringBuilder = new StringBuilder();
 
+    private String wsUrl;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,14 +48,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void testConnect(View view) {
-        Request request = new Request.Builder().url("ws://10.28.6.69:8091/noSocketJs").build();
-        StompHeader nameHeader = new StompHeader("username","jikun");
-        StompHeader passwordHeader = new StompHeader("password","123456");
-        practice.startConnect(request,nameHeader,passwordHeader);
+        wsUrl = "ws://10.28.6.69:8072/noSocketJs";
+        Request request = new Request.Builder().url(wsUrl).build();
+        StompHeader nameHeader = new StompHeader("username", "jikun");
+        StompHeader passwordHeader = new StompHeader("password", "123456");
+        //practice.startConnect(request);
+        practice.startConnect(request, nameHeader, passwordHeader);
 
     }
 
     public void testDisConnect(View view) {
+
         practice.disConnect();
 
     }
@@ -69,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
     @OnStompConnect
     public void onConnect() {
         stringBuilder = new StringBuilder();
-        stringBuilder.append("连接成功\n");
+
+        stringBuilder.append(wsUrl + "连接成功\n");
         tvTextView.setText(stringBuilder.toString());
         practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
         practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/queue/hello", null));

@@ -125,7 +125,9 @@ public class Practice {
         if (StompCommand.CONNECTED.equals(stompMessage.getStompCommand())) {
             connectSendCheckUtils.stopCheck();
             String[] heartbeats = stompMessage.findHeader(StompHeader.HEART_BEAT).split(",");
-            heartBeatTask.beginHeartBeat(webSocket, Long.parseLong(heartbeats[1]), Long.parseLong(heartbeats[0]), null);
+            if(Long.parseLong(heartbeats[1])>0&&Long.parseLong(heartbeats[0])>0){
+                heartBeatTask.beginHeartBeat(webSocket, Long.parseLong(heartbeats[1]), Long.parseLong(heartbeats[0]), null);
+            }
 
             subscribeClassHelper.invokeConnectAll();
             //这里循环注册指令

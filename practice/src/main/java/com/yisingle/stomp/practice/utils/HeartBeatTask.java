@@ -34,7 +34,6 @@ public class HeartBeatTask {
         lastCheckServerTime = System.currentTimeMillis();
         executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(runnable, 0, this.sendHeatTime, TimeUnit.MILLISECONDS);
-
         executorServiceCheck = new ScheduledThreadPoolExecutor(1);
         executorServiceCheck.scheduleAtFixedRate(checkRunable, 0, this.acceptHeatTime, TimeUnit.MILLISECONDS);
     }
