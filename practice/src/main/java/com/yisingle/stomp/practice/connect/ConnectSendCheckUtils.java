@@ -21,15 +21,19 @@ public class ConnectSendCheckUtils {
     private WebSocket webSocket;
 
 
+
     /**
      * 当发送Connect指令后 检查是否有Connected消息返回。
      */
     public void startCheck(WebSocket webSocket) {
         this.webSocket = webSocket;
         lastCheckTime = System.currentTimeMillis();
-        executor = new ScheduledThreadPoolExecutor(1);
-
-        executor.scheduleAtFixedRate(checkRunable, 0, checkTime, TimeUnit.MILLISECONDS);
+        synchronized (this){
+        if(null==executor||executor.isTerminating()||executor.isShutdown()||executor.isTerminated()){
+            executor = new ScheduledThreadPoolExecutor(1);
+            executor.scheduleAtFixedRate(checkRunable, 0, checkTime, TimeUnit.MILLISECONDS);
+        }
+        }
 
     }
 
@@ -40,7 +44,7 @@ public class ConnectSendCheckUtils {
             final long boundary = now - (3 * checkTime);
             if (boundary > lastCheckTime) {
                 if (null != webSocket) {
-                    webSocket.close(1000, "未能收到Connected指令");
+                    webSocket.close(1000, "主动关闭:reason:未能收到Connected指令");
                 }
             }
         }
@@ -50,9 +54,11 @@ public class ConnectSendCheckUtils {
      * 当收到Connected消息后就停止检查
      */
     public void stopCheck() {
-        if (null != executor) {
-            executor.shutdownNow();
-            executor = null;
+        synchronized (this) {
+            if (null != executor) {
+                executor.shutdownNow();
+                executor = null;
+            }
         }
 
 

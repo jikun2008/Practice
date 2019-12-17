@@ -201,7 +201,7 @@ public class Practice {
 
             //发送连接消息
             if (sendMessage(connectMessage.compile())) {
-                //开始检查是否收到Connected消息
+                //发送连接消息成功后开始检查是否收到Connected消息
                 connectSendCheckUtils.startCheck(webSocket);
             } else {
                 webSocket.close(Code.errorCode, "未能成功发送stomp连接消息");
