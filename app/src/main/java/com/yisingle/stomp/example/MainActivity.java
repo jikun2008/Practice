@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void testConnect(View view) {
-        wsUrl = "ws://10.28.6.69:8072/noSocketJs";
+        wsUrl = "ws://10.28.6.69:8072/driver";
         Request request = new Request.Builder().url(wsUrl).build();
         StompHeader nameHeader = new StompHeader("username", "jikun");
         StompHeader passwordHeader = new StompHeader("password", "123456");
@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
 
         stringBuilder.append(wsUrl + "连接成功\n");
         tvTextView.setText(stringBuilder.toString());
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/queue/hello", null));
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/queue/message", null));
+        //practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/all/hello", null));
+        //practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/queue/message", null));
     }
 
     @OnStompDisConnect
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @OnStompSubscribe("/queue/hello")
+    @OnStompSubscribe("/all/hello")
     public void messagequeue(StompMessage stompMessage) {
         stringBuilder.append(stompMessage.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());

@@ -69,6 +69,7 @@ public class Practice {
         if (null != connectStompHeaderList) {
             connectMessage.getStompHeaders().addAll(connectStompHeaderList);
         }
+        disConnect();
         okHttpClient.newWebSocket(request, webSocketListener);
     }
 
