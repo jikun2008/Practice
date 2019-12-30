@@ -64,12 +64,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void testSendMessage(View view) {
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1", null, "sssssss"));
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello", null, "sssssss"));
     }
 
-    public void testSendMessage1(View view) {
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello1", null, "a测"));
-    }
 
     @OnStompConnect
     public void onConnect() {
@@ -77,9 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
         stringBuilder.append(wsUrl + "连接成功\n");
         tvTextView.setText(stringBuilder.toString());
-        //practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
         practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/all/hello", null));
-        //practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/queue/message", null));
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/queue/message", null));
     }
 
     @OnStompDisConnect
