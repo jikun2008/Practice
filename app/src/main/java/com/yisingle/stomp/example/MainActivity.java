@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.yisingle.stomp.practice.MessageInterceptor;
 import com.yisingle.stomp.practice.Practice;
 import com.yisingle.stomp.practice.VersionEnum;
@@ -37,9 +38,7 @@ public class MainActivity extends AppCompatActivity {
                 .sendMessageInterceptors(new MessageInterceptor() {
                     @Override
                     public void intercept(StompMessage stompMessage) {
-//                        StompHeader stompHeader=new StompHeader();
-//                        StompHeader stompHeader=new StompHeader();
-//                        stompMessage.getStompHeaders().add()
+
                     }
                 })
                 .build();
@@ -64,7 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void testSendMessage(View view) {
         //向服务端发送消息
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveMessage", null, "sssssss"));
+
+        Gps gps=new Gps(30.658562,104.065735);
+
+        String body=new Gson().toJson(gps);
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveGps", null, body));
     }
 
 
