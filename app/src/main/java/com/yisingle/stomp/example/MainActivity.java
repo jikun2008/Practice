@@ -51,9 +51,8 @@ public class MainActivity extends AppCompatActivity {
         wsUrl = "ws://10.28.6.69:8072/driver";
         Request request = new Request.Builder().url(wsUrl).build();
         StompHeader nameHeader = new StompHeader("username", "jikun");
-        StompHeader passwordHeader = new StompHeader("password", "123456");
         //practice.startConnect(request);
-        practice.startConnect(request, nameHeader, passwordHeader);
+        practice.startConnect(request, nameHeader);
 
     }
 
@@ -64,19 +63,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void testSendMessage(View view) {
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/hello", null, "sssssss"));
+        //向服务端发送消息
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveMessage", null, "sssssss"));
     }
 
 
     @OnStompConnect
     public void onConnect() {
         stringBuilder = new StringBuilder();
-
         stringBuilder.append(wsUrl + "连接成功\n");
         tvTextView.setText(stringBuilder.toString());
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/all/hello", null));
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/queue/message", null));
+
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/all/driverMessage/broadcast", null));
+        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/driverMessage/point", null));
     }
 
     @OnStompDisConnect
@@ -86,22 +85,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @OnStompSubscribe("/topic/hello")
+    @OnStompSubscribe("/all/driverMessage/broadcast")
     public void message(StompMessage stompMessage) {
+        //接受服务端的消息
         stringBuilder.append(stompMessage.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
 
 
     }
 
-    @OnStompSubscribe("/all/hello")
-    public void messagequeue(StompMessage stompMessage) {
-        stringBuilder.append(stompMessage.compile() + "\n");
-        tvTextView.setText(stringBuilder.toString());
-    }
-
-    @OnStompSubscribe("/user/queue/message")
+    @OnStompSubscribe("/user/driverMessage/point")
     public void messageuserhello(StompMessage stompMessage) {
+        //接受服务端的消息
         stringBuilder.append(stompMessage.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
     }
