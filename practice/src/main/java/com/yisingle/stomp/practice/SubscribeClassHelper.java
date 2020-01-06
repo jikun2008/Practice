@@ -138,7 +138,8 @@ public class SubscribeClassHelper {
                         throw new Error("method " + method.getName() + " have wrong parameterType size" +
                                 ":" + " @StompDisConnect method  must have two parameters  please use " + method.getName() + "(Integer code,String info) instead of it");
                     } else {
-                        if (!parameterTypes[0].equals(Integer.class)) {
+
+                        if (!(parameterTypes[0].equals(Integer.class)||  parameterTypes[0].equals(int.class))) {
                             throw new Error("method " + method.getName() + " have wrong parameterType:" + parameterTypes[0].getName() +
                                     "  first parameterType must be Integer " +
                                     " please use " + method.getName() + "(Integer code,String info) instead of it");
