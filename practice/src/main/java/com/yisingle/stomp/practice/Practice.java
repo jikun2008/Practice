@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -67,7 +68,9 @@ public class Practice {
 
     public void startConnect(Request request, List<StompHeader> connectStompHeaderList) {
         if (null != connectStompHeaderList) {
-            connectMessage.getStompHeaders().addAll(connectStompHeaderList);
+            for (StompHeader header: connectStompHeaderList) {
+                connectMessage.getHeaderMap().put(header.getKey(),header.getValue());
+            }
         }
         disConnect();
         okHttpClient.newWebSocket(request, webSocketListener);
@@ -146,9 +149,11 @@ public class Practice {
         } else if (StompCommand.MESSAGE.equals(stompMessage.getStompCommand())) {
 
             String destination = "";
-            for (StompHeader header : stompMessage.getStompHeaders()) {
-                if (header.getKey().equals("destination")) {
-                    destination = header.getValue();
+
+            for (Map.Entry<String, String> entry: stompMessage.getHeaderMap().entrySet()) {
+                String key=entry.getKey();
+                if (key.equals("destination")) {
+                    destination =entry.getValue();
                     break;
                 }
             }

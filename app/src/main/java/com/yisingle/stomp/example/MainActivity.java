@@ -20,12 +20,12 @@ import com.yisingle.stomp.practice.utils.StompMessageHelper;
 import okhttp3.Request;
 
 public class MainActivity extends AppCompatActivity {
-    private Practice practice;
+    private PracticeInstance practiceInstance;
     private TextView tvTextView;
 
     private StringBuilder stringBuilder = new StringBuilder();
 
-    private String wsUrl;
+
 
 
     @Override
@@ -34,30 +34,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         tvTextView = findViewById(R.id.tvTextView);
 
-        practice = new Practice.Builder().version(VersionEnum.VERSION_1_2)
-                .sendMessageInterceptors(new MessageInterceptor() {
-                    @Override
-                    public void intercept(StompMessage stompMessage) {
-
-                    }
-                })
-                .build();
-        practice.register(this);
+        practiceInstance =PracticeInstance.getInstance();
+        practiceInstance.register(this);
 
     }
 
     public void testConnect(View view) {
-        wsUrl = "ws://10.28.6.69:8072/driver";
-        Request request = new Request.Builder().url(wsUrl).build();
-        StompHeader nameHeader = new StompHeader("username", "jikun");
-        //practice.startConnect(request);
-        practice.startConnect(request, nameHeader);
+
+        practiceInstance.connect();
 
     }
 
     public void testDisConnect(View view) {
 
-        practice.disConnect();
+        practiceInstance.disConnect();
 
     }
 
@@ -65,20 +55,15 @@ public class MainActivity extends AppCompatActivity {
         //向服务端发送消息
 
         Gps gps=new Gps(30.658562,104.065735);
-
-        String body=new Gson().toJson(gps);
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveGps", null, body));
+        practiceInstance.sendGps(gps);
     }
 
 
     @OnStompConnect
     public void onConnect() {
         stringBuilder = new StringBuilder();
-        stringBuilder.append(wsUrl + "连接成功\n");
+        stringBuilder.append("连接成功\n");
         tvTextView.setText(stringBuilder.toString());
-
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/all/driverMessage/broadcast", null));
-        practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/user/driverMessage/point", null));
     }
 
     @OnStompDisConnect
@@ -88,27 +73,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @OnStompSubscribe("/all/driverMessage/broadcast")
-    public void message(StompMessage stompMessage) {
-        //接受服务端的消息
-        stringBuilder.append(stompMessage.compile() + "\n");
-        tvTextView.setText(stringBuilder.toString());
-
-
-    }
-
     @OnStompSubscribe("/user/driverMessage/point")
-    public void messageuserhello(StompMessage stompMessage) {
+    public void onReviceMessage(StompMessage message){
+
         //接受服务端的消息
-        stringBuilder.append(stompMessage.compile() + "\n");
+        stringBuilder.append(message.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
     }
+    @OnStompSubscribe("/user/driverMessage/order")
+    public void onReviceOrderMessage(StompMessage message ){
+        //接受服务端的消息
+        stringBuilder.append(message.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
+
+    }
+
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        practice.unregister(this);
-        practice.disConnect();
+        practiceInstance.unregister(this);
+        practiceInstance.disConnect();
     }
 
 

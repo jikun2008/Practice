@@ -5,7 +5,9 @@ import android.text.TextUtils;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,17 +23,21 @@ public class StompMessage {
     private static final Pattern PATTERN_HEADER = Pattern.compile("([^:\\s]+)\\s*:\\s*([^:\\s]+)");
 
     private final String mStompCommand;
-    private final List<StompHeader> mStompHeaders;
+    private final  Map<String,String> headersMap=new HashMap<>();
     private final String mPayload;
 
-    public StompMessage(String stompCommand, List<StompHeader> stompHeaders, String payload) {
+    public StompMessage(String stompCommand,List<StompHeader> headers,String payload) {
         mStompCommand = stompCommand;
-        mStompHeaders = stompHeaders;
+        if(null!=headers){
+            for(StompHeader h:headers){
+                headersMap.put(h.getKey(),h.getValue());
+            }
+        }
         mPayload = payload;
     }
 
-    public List<StompHeader> getStompHeaders() {
-        return mStompHeaders;
+    public Map<String,String> getHeaderMap() {
+        return headersMap;
     }
 
     public String getPayload() {
@@ -44,11 +50,8 @@ public class StompMessage {
 
 
     public String findHeader(String key) {
-        if (mStompHeaders == null) return null;
-        for (StompHeader header : mStompHeaders) {
-            if (header.getKey().equals(key)) return header.getValue();
-        }
-        return null;
+        if (headersMap == null) return null;
+        return headersMap.get(key);
     }
 
 
@@ -60,8 +63,9 @@ public class StompMessage {
     public String compile(boolean legacyWhitespace) {
         StringBuilder builder = new StringBuilder();
         builder.append(mStompCommand).append('\n');
-        for (StompHeader header : mStompHeaders) {
-            builder.append(header.getKey()).append(':').append(header.getValue()).append('\n');
+        for (String key : headersMap.keySet()) {
+          String  value = headersMap.get(key);
+            builder.append(key).append(':').append(value).append('\n');
         }
         if (null != findHeader("StompHeader.CONTENT_LENGTH")) {
             addContentLengthHeader(builder, mPayload);
@@ -91,10 +95,10 @@ public class StompMessage {
 
     public static StompMessage from(String data) {
         if ("\n".equals(data)) {
-            return new StompMessage(StompCommand.HEART, null, data);
+            return new StompMessage(StompCommand.HEART,null,  data);
         }
         if (data == null || data.trim().isEmpty()) {
-            return new StompMessage(StompCommand.UNKNOWN, null, data);
+            return new StompMessage(StompCommand.UNKNOWN,null,  data);
         }
         Scanner reader = new Scanner(new StringReader(data));
         reader.useDelimiter("\\n");
@@ -118,7 +122,7 @@ public class StompMessage {
     public String toString() {
         return "StompMessage{" +
                 "command='" + mStompCommand + '\'' +
-                ", headers=" + mStompHeaders +
+                ", headers=" + headersMap.toString() +
                 ", payload='" + mPayload + '\'' +
                 '}';
     }
