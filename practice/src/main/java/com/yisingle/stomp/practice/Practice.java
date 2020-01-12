@@ -38,10 +38,12 @@ public class Practice {
     private StompMessage connectMessage;
     private ConnectSendCheckUtils connectSendCheckUtils;
     private HeartBeatTask heartBeatTask;
+    public static boolean isDebug=false;
 
     private Practice(Builder builder, StompMessage connectMessage) {
         sendMessageInterceptors = builder.sendMessageInterceptors;
         reviceMessageInterceptors = builder.reviceMessageInterceptors;
+        isDebug=builder.isDebug;
         okHttpBuilder = builder.okHttpBuilder;
         okHttpClient = okHttpBuilder.build();
 
@@ -103,7 +105,6 @@ public class Practice {
     }
 
     private boolean sendMessage(String message) {
-        Log.e(TAG, message);
         if (null != webSocket) {
             return webSocket.send(message);
         } else {
@@ -120,8 +121,9 @@ public class Practice {
         //开始解析消息
         StompMessage stompMessage = StompMessage.from(message);
 
+        //这里排除收到的心跳
         if (!"\n".equals(message)) {
-            Log.e(TAG, TAG + "-parseMessage:" + message);
+            //Log.e(TAG, TAG + "-parseMessage:" + message);
             for (MessageInterceptor interceptor : reviceMessageInterceptors) {
                 interceptor.intercept(stompMessage);
             }
@@ -146,7 +148,9 @@ public class Practice {
 
         } else if (StompCommand.HEART.equals(stompMessage.getStompCommand())) {
             //收到服务器心跳
-
+            if(isDebug){
+                Log.e(HeartBeatTask.class.getSimpleName(),"REVICED_HEART");
+            }
         } else if (StompCommand.MESSAGE.equals(stompMessage.getStompCommand())) {
 
             String destination = "";
@@ -177,7 +181,7 @@ public class Practice {
         public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             super.onClosing(webSocket, code, reason);
             heartBeatTask.stopHeartBeat();
-            subscribeClassHelper.invokeCloseAll(code, reason);
+            webSocket.close(code,reason);
             Log.i(TAG, TAG + "-onClosing-code=" + code + "reason=" + reason);
         }
 
@@ -224,6 +228,7 @@ public class Practice {
         private long sendHeartbeatTime = 3000;
         private long acceptHeartbeatTime = 3000;
         private String version = VersionEnum.VERSION_1_1.getVersion();
+        private boolean isDebug;
         private List<StompHeader> headerList;
         private OkHttpClient.Builder okHttpBuilder;
         private List<Class<?>> classList = new ArrayList<>();
@@ -259,6 +264,11 @@ public class Practice {
 
         public Builder sendMessageInterceptors(List<MessageInterceptor> messageInterceptors) {
             sendMessageInterceptors.addAll(messageInterceptors);
+            return this;
+        }
+
+        public Builder debug(boolean isDebug) {
+            this.isDebug=isDebug;
             return this;
         }
 

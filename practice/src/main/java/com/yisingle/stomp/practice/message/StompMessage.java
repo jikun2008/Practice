@@ -120,13 +120,8 @@ public class StompMessage {
 
     @Override
     public String toString() {
-        return "StompMessage{" +
-                "command='" + mStompCommand + '\'' +
-                ", headers=" + headersMap.toString() +
-                ", payload='" + mPayload + '\'' +
-                '}';
+        return compile();
     }
-
 
     public static String getHeartBeatMessage() {
         return "\r\n";

@@ -4,6 +4,7 @@ import android.util.Log;
 
 
 import com.yisingle.stomp.practice.Code;
+import com.yisingle.stomp.practice.Practice;
 import com.yisingle.stomp.practice.message.StompMessage;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -54,7 +55,9 @@ public class HeartBeatTask {
 
     private void sendHeartMessage() {
         if (null != webSocket) {
-            Log.e(TAG, "[Send]:Heart");
+            if(Practice.isDebug){
+                Log.e(TAG, "[Send]:Heart");
+            }
             webSocket.send(StompMessage.getHeartBeatMessage());
         } else {
             Log.e(TAG, "sendHeartMessage Failed beacause websocket is null");
