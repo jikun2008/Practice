@@ -55,9 +55,12 @@ public class PracticeInstance {
     }
 
     public void connect(){
-        Request request = new Request.Builder().url("ws://192.168.43.78:8072/driver").build();
+        Request request = new Request.Builder()
+                .url("ws://192.168.3.107:8072/driver")
+                .build();
 
-        StompHeader nameHeader = new StompHeader("token","123");
+
+        StompHeader nameHeader = new StompHeader("token","eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxNzcxMzU3NjAzMSIsInBhc3N3b3JkIjoiRTEwQURDMzk0OUJBNTlBQkJFNTZFMDU3RjIwRjg4M0UiLCJwaG9uZSI6IjE3NzEzNTc2MDMxIiwiaWQiOjEyMTU1Nzc5NzQ1NTcxMzQ4NTAsImV4cCI6MTU3ODg4NzQ2NiwiaWF0IjoxNTc4ODAxMDY2LCJqdGkiOiIwYzQyY2Y0MC05NmJiLTRjZWUtOTZmYS04YWFkNGY3NGEzN2IifQ.fr4zoGTfYh2B63a3TpErnRBcvrFC1viSZOXVhanXtj8");
         practice.startConnect(request,nameHeader);
 
     }

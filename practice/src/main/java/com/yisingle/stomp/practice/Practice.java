@@ -44,6 +44,7 @@ public class Practice {
         reviceMessageInterceptors = builder.reviceMessageInterceptors;
         okHttpBuilder = builder.okHttpBuilder;
         okHttpClient = okHttpBuilder.build();
+
         this.connectMessage = connectMessage;
         connectSendCheckUtils = new ConnectSendCheckUtils();
         subscribeClassHelper = new SubscribeClassHelper();
@@ -66,7 +67,7 @@ public class Practice {
 
     }
 
-    public void startConnect(Request request, List<StompHeader> connectStompHeaderList) {
+    public void startConnect(final Request request, List<StompHeader> connectStompHeaderList) {
         if (null != connectStompHeaderList) {
             for (StompHeader header: connectStompHeaderList) {
                 connectMessage.getHeaderMap().put(header.getKey(),header.getValue());
@@ -230,9 +231,9 @@ public class Practice {
 
         public Builder() {
             okHttpBuilder = new OkHttpClient.Builder()
-                    .writeTimeout(3, TimeUnit.SECONDS)
-                    .readTimeout(3, TimeUnit.SECONDS)
-                    .connectTimeout(3, TimeUnit.SECONDS);
+                    .writeTimeout(500, TimeUnit.MILLISECONDS)
+                    .readTimeout(500, TimeUnit.MILLISECONDS)
+                    .connectTimeout(500, TimeUnit.MILLISECONDS);
         }
 
         public Builder okHttpBuilder(OkHttpClient.Builder val) {
