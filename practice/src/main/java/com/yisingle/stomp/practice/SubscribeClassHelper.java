@@ -67,7 +67,15 @@ public class SubscribeClassHelper {
 
     protected synchronized void unregister(Object subscriber) {
         METHOD_CACHE.remove(subscriber.getClass());
-        for (Map.Entry<String, CopyOnWriteArrayList<SubscriberMethod>> entry : destinationMethodMap.entrySet()) {
+        removeMap(destinationMethodMap,subscriber);
+        removeMap(connectMethodMap,subscriber);
+
+
+
+    }
+
+    private void removeMap(Map<String, CopyOnWriteArrayList<SubscriberMethod>> methodMap,Object subscriber){
+        for (Map.Entry<String, CopyOnWriteArrayList<SubscriberMethod>> entry : methodMap.entrySet()) {
             List<SubscriberMethod> methList = entry.getValue();
             for (SubscriberMethod method : methList) {
                 if (method.getSubscriber() == subscriber) {

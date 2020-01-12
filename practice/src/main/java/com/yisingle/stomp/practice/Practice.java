@@ -177,6 +177,7 @@ public class Practice {
         public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             super.onClosing(webSocket, code, reason);
             heartBeatTask.stopHeartBeat();
+            subscribeClassHelper.invokeCloseAll(code, reason);
             Log.i(TAG, TAG + "-onClosing-code=" + code + "reason=" + reason);
         }
 
@@ -232,7 +233,7 @@ public class Practice {
         public Builder() {
             okHttpBuilder = new OkHttpClient.Builder()
                     .writeTimeout(500, TimeUnit.MILLISECONDS)
-                    .readTimeout(500, TimeUnit.MILLISECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
                     .connectTimeout(500, TimeUnit.MILLISECONDS);
         }
 
