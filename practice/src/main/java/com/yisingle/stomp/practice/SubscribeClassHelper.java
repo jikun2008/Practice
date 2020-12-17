@@ -3,21 +3,21 @@ package com.yisingle.stomp.practice;
 import android.os.Handler;
 import android.os.Looper;
 
-
 import com.yisingle.stomp.practice.annotation.callback.OnStompConnect;
 import com.yisingle.stomp.practice.annotation.callback.OnStompDisConnect;
 import com.yisingle.stomp.practice.annotation.callback.OnStompSubscribe;
 import com.yisingle.stomp.practice.message.StompMessage;
-import com.yisingle.stomp.practice.utils.StompMessageHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 
 
 public class SubscribeClassHelper {
@@ -33,9 +33,7 @@ public class SubscribeClassHelper {
 
     private static final int MODIFIERS_IGNORE = Modifier.ABSTRACT | Modifier.STATIC | BRIDGE | SYNTHETIC;
     private Map<Class<?>, List<SubscriberMethod>> METHOD_CACHE = new ConcurrentHashMap<>();
-
-    private Map<String, CopyOnWriteArrayList<SubscriberMethod>> destinationMethodMap = new ConcurrentHashMap<>();
-
+    private Map<String, Map<String, CopyOnWriteArrayList<SubscriberMethod>>> groupMethodMap = new ConcurrentHashMap<>();
     private Map<String, CopyOnWriteArrayList<SubscriberMethod>> connectMethodMap = new ConcurrentHashMap<>();
 
 
@@ -53,7 +51,17 @@ public class SubscribeClassHelper {
 
 
         for (SubscriberMethod subscriberMethod : methodList) {
+
+            String group = subscriberMethod.getGroup();
+
+            Map<String, CopyOnWriteArrayList<SubscriberMethod>> destinationMethodMap = groupMethodMap.get(group);
+            if (null == destinationMethodMap) {
+                destinationMethodMap = new HashMap<>();
+                groupMethodMap.put(group, destinationMethodMap);
+            }
+
             String destination = subscriberMethod.getDestination();
+
             CopyOnWriteArrayList<SubscriberMethod> subscriptions = destinationMethodMap.get(destination);
             if (subscriptions == null) {
                 subscriptions = new CopyOnWriteArrayList<>();
@@ -67,14 +75,15 @@ public class SubscribeClassHelper {
 
     protected synchronized void unregister(Object subscriber) {
         METHOD_CACHE.remove(subscriber.getClass());
-        removeMap(destinationMethodMap,subscriber);
-        removeMap(connectMethodMap,subscriber);
-
+        for (Map.Entry<String, Map<String, CopyOnWriteArrayList<SubscriberMethod>>> entry : groupMethodMap.entrySet()) {
+            removeMap(entry.getValue(), subscriber);
+        }
+        removeMap(connectMethodMap, subscriber);
 
 
     }
 
-    private void removeMap(Map<String, CopyOnWriteArrayList<SubscriberMethod>> methodMap,Object subscriber){
+    private void removeMap(Map<String, CopyOnWriteArrayList<SubscriberMethod>> methodMap, Object subscriber) {
         for (Map.Entry<String, CopyOnWriteArrayList<SubscriberMethod>> entry : methodMap.entrySet()) {
             List<SubscriberMethod> methList = entry.getValue();
             for (SubscriberMethod method : methList) {
@@ -87,7 +96,7 @@ public class SubscribeClassHelper {
 
     protected void clear() {
         METHOD_CACHE.clear();
-        destinationMethodMap.clear();
+        groupMethodMap.clear();
 
     }
 
@@ -115,17 +124,33 @@ public class SubscribeClassHelper {
                 //方法修饰类型必须是public=共有的 && 同时（不能抽象的，不能静态的，不能桥接的，不能合成的）
                 // （ MODIFIERS_IGNORE == Modifier.ABSTRACT | Modifier.STATIC | BRIDGE | SYNTHETIC）
                 Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes.length == 1) {
+                if (parameterTypes.length >= 1) {
                     OnStompSubscribe subscribeAnnotation = method.getAnnotation(OnStompSubscribe.class);
                     if (subscribeAnnotation != null) {
                         String destination = subscribeAnnotation.value();
-                        //参数类型
-                        Class<?> parameterType = parameterTypes[0];
-                        if (!parameterType.equals(StompMessage.class)) {
-                            throw new Error("method " + method.getName() + " have wrong parameterType:" + parameterType.getName() + " parameterType must be StompMessage");
-                        }
+                        String group = destination.replaceAll("/\\{*[a-zA-Z0-9]+\\}*$", "");
+                        String parameterDestinationName = destination.replaceAll(group + "/", destination);
+                        //代表是有{}的
+                        boolean isMatch = Pattern.matches("\\{[a-zA-Z0-9]+\\}$", parameterDestinationName);
 
-                        methodList.add(new SubscriberMethod(destination, subscriber, method, parameterType));
+
+                        //参数类型
+                        Class<?> parameterType0 = parameterTypes[0];
+                        if (!parameterType0.equals(StompMessage.class)) {
+                            throw new Error("method " + method.getName() + " have wrong parameterType:" + parameterType0.getName() + " parameterType first params must be StompMessage");
+                        }
+                        Class<?> parameterType1 = null;
+                        if (parameterTypes.length > 1) {
+                            parameterType1 = parameterTypes[1];
+                            if (!parameterType1.equals(String.class)) {
+                                throw new Error("method " + method.getName() + " have wrong parameterType:" + parameterType0.getName() + " parameterType first params must be String");
+                            }
+                        } else {
+                            if (isMatch) {
+                                throw new Error("method " + method.getName() + " have wrong parameter size:" + parameterTypes.length + " parameterTypes.length must be two case of you set " + parameterDestinationName);
+                            }
+                        }
+                        methodList.add(new SubscriberMethod(group, destination, subscriber, method, parameterType0, parameterType1));
                         METHOD_CACHE.put(subscriberClass, methodList);
                     }
                 }
@@ -137,7 +162,7 @@ public class SubscribeClassHelper {
                         throw new Error("method " + method.getName() + " have wrong parameterType size" +
                                 ":" + " @OnStompConnect method  do not have any parameters  please use " + method.getName() + "() instead of it");
                     }
-                    connectMethodMap.get("OnConnect").add(new SubscriberMethod("", subscriber, method, null));
+                    connectMethodMap.get("OnConnect").add(new SubscriberMethod("", "", subscriber, method, null, null));
                 }
 
                 OnStompDisConnect disConnectAnnotation = method.getAnnotation(OnStompDisConnect.class);
@@ -147,7 +172,7 @@ public class SubscribeClassHelper {
                                 ":" + " @StompDisConnect method  must have two parameters  please use " + method.getName() + "(Integer code,String info) instead of it");
                     } else {
 
-                        if (!(parameterTypes[0].equals(Integer.class)||  parameterTypes[0].equals(int.class))) {
+                        if (!(parameterTypes[0].equals(Integer.class) || parameterTypes[0].equals(int.class))) {
                             throw new Error("method " + method.getName() + " have wrong parameterType:" + parameterTypes[0].getName() +
                                     "  first parameterType must be Integer " +
                                     " please use " + method.getName() + "(Integer code,String info) instead of it");
@@ -158,7 +183,7 @@ public class SubscribeClassHelper {
                                     " please use " + method.getName() + "(Integer code,String info) instead of it");
                         }
                     }
-                    connectMethodMap.get("OnClose").add(new SubscriberMethod("", subscriber, method, null));
+                    connectMethodMap.get("OnClose").add(new SubscriberMethod("", "", subscriber, method, null, null));
                 }
 
 
@@ -170,13 +195,13 @@ public class SubscribeClassHelper {
 
     }
 
-    public List<StompMessage> getsubscribeStompMessage() {
-        List<StompMessage> stompMessageList = new ArrayList<>();
-        for (Map.Entry<String, CopyOnWriteArrayList<SubscriberMethod>> entry : destinationMethodMap.entrySet()) {
-            stompMessageList.add(StompMessageHelper.createSubscribeStompMessage(entry.getKey(), null));
-        }
-        return stompMessageList;
-    }
+//    public List<StompMessage> getsubscribeStompMessage() {
+//        List<StompMessage> stompMessageList = new ArrayList<>();
+//        for (Map.Entry<String, CopyOnWriteArrayList<SubscriberMethod>> entry : destinationMethodMap.entrySet()) {
+//            stompMessageList.add(StompMessageHelper.createSubscribeStompMessage(entry.getKey(), null));
+//        }
+//        return stompMessageList;
+//    }
 
     public void invokeConnectAll() {
         handler.post(new Runnable() {
@@ -229,11 +254,30 @@ public class SubscribeClassHelper {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                CopyOnWriteArrayList<SubscriberMethod> writeArrayList = destinationMethodMap.get(destination);
+                String group = destination.replaceAll("/\\{*[a-zA-Z0-9]+\\}*$", "");
+                String parameterDestinationName = destination.replaceAll(group + "/", "");
+
+                Map<String, CopyOnWriteArrayList<SubscriberMethod>> destinationMethodMap = groupMethodMap.get(group);
+                if (null == destinationMethodMap) {
+                    return;
+                }
+
+
+                CopyOnWriteArrayList<SubscriberMethod> writeArrayList = new CopyOnWriteArrayList<>();
+                for (Map.Entry<String, CopyOnWriteArrayList<SubscriberMethod>> entry : destinationMethodMap.entrySet()) {
+                    writeArrayList.addAll(entry.getValue());
+                }
+
+
                 if (null != writeArrayList) {
                     for (SubscriberMethod method : writeArrayList) {
                         try {
-                            method.getMethod().invoke(method.getSubscriber(), stompMessage);
+                            if (null != method.getParameterType1()) {
+                                method.getMethod().invoke(method.getSubscriber(), stompMessage, parameterDestinationName);
+                            } else {
+                                method.getMethod().invoke(method.getSubscriber(), stompMessage);
+                            }
+
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         } catch (InvocationTargetException e) {

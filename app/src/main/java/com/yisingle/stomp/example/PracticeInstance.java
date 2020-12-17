@@ -78,6 +78,13 @@ public class PracticeInstance {
                 )
         );
 
+        practice.sendStompMessage(
+                StompMessageHelper.createSubscribeStompMessage(
+                        "/all/driverMessage/im/123456",
+                        null
+                )
+        );
+
         //发起订单端点连接
         practice.sendStompMessage(
                 StompMessageHelper.createSubscribeStompMessage(
@@ -94,8 +101,14 @@ public class PracticeInstance {
         practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/relyOrder", null, id.toString()));
     }
 
+
+
     public void sendGps() {
         practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveGps", null, "gps"));
+    }
+
+    public void sendimMsg(String id) {
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/im/"+id, null, "Im消息+"+id));
     }
 
 }

@@ -3,6 +3,7 @@ package com.yisingle.stomp.example;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -101,11 +102,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @OnStompSubscribe("/all/driverMessage/im/123456")
-    public void onReviceBroadcastIMiDMessage(StompMessage message) {
+    @OnStompSubscribe("/all/driverMessage/im/{id}")
+    public void onReviceBroadcastIMiDMessage(StompMessage message, String id) {
         //接受服务端的消息
+        Log.e("测试代码", "测试代码onReviceBroadcastIMiDMessage=" + id);
         stringBuilder.append(message.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
+
 
     }
 

@@ -20,6 +20,13 @@ public class TestHttpController {
     }
 
 
+    @GetMapping(value = "/testimId")
+    public String testBroadcastId() {
+        simpMessagingTemplate.convertAndSend("/all/driverMessage/im/123456", "根据id来分发数据");
+        return "发送im广播";
+    }
+
+
     @GetMapping(value = "/testSendUser")
     public String testSendUser() {
         //默认隐藏了前缀app
