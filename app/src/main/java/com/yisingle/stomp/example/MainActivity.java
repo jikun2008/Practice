@@ -61,6 +61,14 @@ public class MainActivity extends AppCompatActivity {
         practiceInstance.sendRelyOrder(9999l);
     }
 
+    public void testSendImMsg(View view) {
+        if (view.getId() == R.id.btSendIm1) {
+            practiceInstance.sendimMsg("123456");
+        } else if (view.getId() == R.id.btSendIm2) {
+            practiceInstance.sendimMsg("tttsss222");
+        }
+    }
+
 
     @OnStompConnect
     public void onConnect() {
@@ -87,6 +95,14 @@ public class MainActivity extends AppCompatActivity {
 
     @OnStompSubscribe("/all/driverMessage/broadcast")
     public void onReviceBroadcastMessage(StompMessage message) {
+        //接受服务端的消息
+        stringBuilder.append(message.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
+
+    }
+
+    @OnStompSubscribe("/all/driverMessage/im/123456")
+    public void onReviceBroadcastIMiDMessage(StompMessage message) {
         //接受服务端的消息
         stringBuilder.append(message.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
