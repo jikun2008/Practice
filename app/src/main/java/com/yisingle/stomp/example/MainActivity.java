@@ -13,7 +13,12 @@ import com.yisingle.stomp.practice.message.StompMessage;
 
 /**
  * demo请启动stompService
- * 调用这个接口 http://localhost:8090/test/testBroadcast 就可以发送广播了
+ * 调用这个接口 http://localhost:8090/test/testBroadcast
+ * demo 就可以 收到服务器发送的广播消息
+ * <p>
+ * <p>
+ * 调用这个接口 http://localhost:8090/test/testSendUser
+ * demo 就可以 收到服务器发送的个人消息消息
  */
 
 public class MainActivity extends AppCompatActivity {
