@@ -6,18 +6,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.yisingle.stomp.practice.MessageInterceptor;
-import com.yisingle.stomp.practice.Practice;
-import com.yisingle.stomp.practice.VersionEnum;
 import com.yisingle.stomp.practice.annotation.callback.OnStompConnect;
 import com.yisingle.stomp.practice.annotation.callback.OnStompDisConnect;
 import com.yisingle.stomp.practice.annotation.callback.OnStompSubscribe;
-import com.yisingle.stomp.practice.message.StompHeader;
 import com.yisingle.stomp.practice.message.StompMessage;
-import com.yisingle.stomp.practice.utils.StompMessageHelper;
 
-import okhttp3.Request;
+/**
+ * demo请启动stompService
+ * 调用这个接口 http://localhost:8090/test/testBroadcast 就可以发送广播了
+ */
 
 public class MainActivity extends AppCompatActivity {
     private PracticeInstance practiceInstance;
@@ -26,15 +23,13 @@ public class MainActivity extends AppCompatActivity {
     private StringBuilder stringBuilder = new StringBuilder();
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tvTextView = findViewById(R.id.tvTextView);
 
-        practiceInstance =PracticeInstance.getInstance();
+        practiceInstance = PracticeInstance.getInstance();
         practiceInstance.register(this);
 
     }
@@ -51,11 +46,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void testSendMessage(View view) {
+    public void testSendGps(View view) {
         //向服务端发送消息
+        practiceInstance.sendGps();
+    }
 
-        Gps gps=new Gps(30.658562,104.065735);
-        practiceInstance.sendGps(gps);
+    public void testSendRely(View view) {
+        //向服务端发送消息
+        practiceInstance.sendRelyOrder(9999l);
     }
 
 
@@ -64,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         stringBuilder = new StringBuilder();
         stringBuilder.append("连接成功\n");
         tvTextView.setText(stringBuilder.toString());
+        PracticeInstance.getInstance().sendSubscribeMessage();
     }
 
     @OnStompDisConnect
@@ -73,21 +72,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @OnStompSubscribe("/user/driverMessage/point")
-    public void onReviceMessage(StompMessage message){
-
-        //接受服务端的消息
-        stringBuilder.append(message.compile() + "\n");
-        tvTextView.setText(stringBuilder.toString());
-    }
     @OnStompSubscribe("/user/driverMessage/order")
-    public void onReviceOrderMessage(StompMessage message ){
+    public void onReviceOrderMessage(StompMessage message) {
         //接受服务端的消息
         stringBuilder.append(message.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
 
     }
 
+    @OnStompSubscribe("/all/driverMessage/broadcast")
+    public void onReviceBroadcastMessage(StompMessage message) {
+        //接受服务端的消息
+        stringBuilder.append(message.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
+
+    }
 
 
     @Override

@@ -41,11 +41,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:onClick="testSendMessage"
-        android:text="发送App开头的消息"
+        android:onClick="testSendGps"
+        android:text="发送GPS消息"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btConnect" />
+
+
+    <Button
+        android:id="@+id/btSendAppRely"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:onClick="testSendRely"
+        android:text="发送Rely消息"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btSendAppMessage" />
 
 
 

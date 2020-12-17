@@ -47,45 +47,38 @@ public class PracticeInstance {
         return instance;
 
     }
-    public void register(Object object){
+
+    public void register(Object object) {
         practice.register(object);
     }
-    public void unregister(Object object){
+
+    public void unregister(Object object) {
         practice.unregister(object);
     }
 
-    public void connect(){
+    public void connect() {
         Request request = new Request.Builder()
-                .url("ws://192.168.3.107:8072/driver")
+                .url("ws://192.168.137.1:8090/driver")
                 .build();
 
-
-        StompHeader nameHeader = new StompHeader("token","eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxNzcxMzU3NjAzMSIsInBhc3N3b3JkIjoiRTEwQURDMzk0OUJBNTlBQkJFNTZFMDU3RjIwRjg4M0UiLCJwaG9uZSI6IjE3NzEzNTc2MDMxIiwiaWQiOjEyMTU1Nzc5NzQ1NTcxMzQ4NTAsImV4cCI6MTU3ODg4NzQ2NiwiaWF0IjoxNTc4ODAxMDY2LCJqdGkiOiIwYzQyY2Y0MC05NmJiLTRjZWUtOTZmYS04YWFkNGY3NGEzN2IifQ.fr4zoGTfYh2B63a3TpErnRBcvrFC1viSZOXVhanXtj8");
-        practice.startConnect(request,nameHeader);
+        practice.startConnect(request);
 
     }
 
-    public void disConnect(){
+    public void disConnect() {
         practice.disConnect();
     }
 
-    public void sendSubscribeMessage(){
-        //发起注册端点连接
+    public void sendSubscribeMessage() {
+        //发送广播端点连接
         practice.sendStompMessage(
                 StompMessageHelper.createSubscribeStompMessage(
                         "/all/driverMessage/broadcast",
                         null
                 )
         );
-        //发起注册端点连接
-        practice.sendStompMessage(
-                StompMessageHelper.createSubscribeStompMessage(
-                        "/user/driverMessage/point",
-                        null
-                )
-        );
 
-        //发起注册端点连接
+        //发起订单端点连接
         practice.sendStompMessage(
                 StompMessageHelper.createSubscribeStompMessage(
                         "/user/driverMessage/order",
@@ -97,12 +90,12 @@ public class PracticeInstance {
     //长连接收到了订单并回复消息给服务器告诉服务器我收到了订单
     // 这个时候服务会把订单状态改成
     //已经分发给司机等待司机响应 STATUS_SEND_DRIVER(1)
-    public void sendRelyOrder(Long id){
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/relyOrder", null,id.toString() ));
+    public void sendRelyOrder(Long id) {
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/relyOrder", null, id.toString()));
     }
 
-    public void sendGps(Gps gps){
-        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveGps", null,  "123"));
+    public void sendGps() {
+        practice.sendStompMessage(StompMessageHelper.createSendStompMessage("/app/driver/receiveGps", null, "gps"));
     }
 
 }
