@@ -44,7 +44,7 @@ Add it in your root build.gradle at the end of repositories:
 ```
   
     	dependencies {
-	        implementation 'com.github.jikun2008:Practice:1.0.0'
+	        implementation 'com.github.jikun2008:Practice:1.1.4'
 	}
   
 
@@ -67,8 +67,10 @@ Add it in your root build.gradle at the end of repositories:
 
    
     //Connect
-     Request request = new Request.Builder().url("ws://10.28.6.69:8091/noSocketJs").build();
-     practice.startConnect(request);
+        Request request = new Request.Builder()
+                .url("ws://192.168.137.1:8090/driver")
+                .build();
+        practice.startConnect(request);
 
     
 
@@ -82,7 +84,28 @@ Add it in your root build.gradle at the end of repositories:
 	
 
     //发Subscribe消息到服务端
-    practice.sendStompMessage(StompMessageHelper.createSubscribeStompMessage("/topic/hello", null));
+          //发送广播端点连接
+          practice.sendStompMessage(
+                  StompMessageHelper.createSubscribeStompMessage(
+                          "/all/driverMessage/broadcast",
+                          null
+                  )
+          );
+
+          practice.sendStompMessage(
+                  StompMessageHelper.createSubscribeStompMessage(
+                          "/all/driverMessage/im/123456",
+                          null
+                  )
+          );
+
+
+          practice.sendStompMessage(
+                  StompMessageHelper.createSubscribeStompMessage(
+                          "/user/driverMessage/order",
+                          null
+                  )
+          );
         
     }
 
@@ -94,13 +117,29 @@ Add it in your root build.gradle at the end of repositories:
     }
 
 
-   //例如当收到destination=/topic/hello的消息时候会回调这个方法
-    @OnStompSubscribe("/topic/hello")
-    public void message(StompMessage stompMessage) {
-        stringBuilder.append(stompMessage.compile() + "\n");
+   //例如当收到destination=/user/driverMessage/order的消息时候会回调这个方法
+    @OnStompSubscribe("/user/driverMessage/order")
+    public void onReviceOrderMessage(StompMessage message) {
+        //接受服务端的消息
+        stringBuilder.append(message.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
 
+    }
 
+    @OnStompSubscribe("/all/driverMessage/broadcast")
+    public void onReviceBroadcastMessage(StompMessage message) {
+        //接受服务端的消息
+        stringBuilder.append(message.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
+
+    }
+
+    @OnStompSubscribe("/all/driverMessage/im/{id}")
+    public void onReviceBroadcastIMiDMessage(StompMessage message, String id) {
+        //接受服务端的消息
+        Log.e("测试代码", "测试代码onReviceBroadcastIMiDMessage=" + id);
+        stringBuilder.append(message.compile() + "\n");
+        tvTextView.setText(stringBuilder.toString());
     }
 
     @Override

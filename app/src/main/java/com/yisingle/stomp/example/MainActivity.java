@@ -108,8 +108,6 @@ public class MainActivity extends AppCompatActivity {
         Log.e("测试代码", "测试代码onReviceBroadcastIMiDMessage=" + id);
         stringBuilder.append(message.compile() + "\n");
         tvTextView.setText(stringBuilder.toString());
-
-
     }
 
 
